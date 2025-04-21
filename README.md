@@ -1,6 +1,6 @@
 # Stochastic Storm Transposition (SST) Importance Sampling Demos
 ## Overview
-This repository provides a suite of unit tests and simulation routines to explore and compare stochastic storm transposition (SST) methods using importance sampling. The toy problems illustrate how statistical efficiency can be significantly improved over traditional uniform sampling approaches by focusing computational effort on regions of interest—namely, areas where storm footprints intersect a watershed.
+This repository provides a suite of simulation routines to explore and compare stochastic storm transposition (SST) methods using importance sampling. The toy problems illustrate how statistical efficiency can be significantly improved over traditional uniform sampling approaches by focusing computational effort on regions of interest—namely, areas where storm footprints intersect a watershed.
 
 ![image](https://github.com/user-attachments/assets/8aadf28f-41ba-46d3-8ed5-f0a6a7738882)
 
