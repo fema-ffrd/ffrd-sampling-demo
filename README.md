@@ -50,6 +50,8 @@ This project relies on the following components:
   - Distributions (`Uniform`, `TruncatedNormal`, `Normal`, `Mixture`)
   - Statistical tools (`PlottingPositions.Weibull`)
 
+The Numerics library can be downloaded [here](https://github.com/USACE-RMC/Numerics/).
+
 Ensure you have the appropriate numerical and statistical support libraries available in your build environment.
 
 ---
