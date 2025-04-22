@@ -1,16 +1,7 @@
-﻿using Numerics;
-using Numerics.Data.Statistics;
+﻿using Numerics.Data.Statistics;
 using Numerics.Distributions;
-using Numerics.Mathematics.SpecialFunctions;
 using Numerics.Sampling;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Intrinsics.X86;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
 
 namespace Test_FFRD
 {
