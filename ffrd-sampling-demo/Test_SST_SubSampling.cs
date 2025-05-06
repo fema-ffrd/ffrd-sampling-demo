@@ -39,7 +39,7 @@ namespace Test_FFRD
         /// </para>
         /// </remarks>
         [TestMethod]
-        public void Test__kNN_SubSampling_ToyProblem()
+        public void Test_kNN_SubSampling_ToyProblem()
         {
             // Marginal distributions that represent target flow sites
             var dists = new Normal[] { new Normal(10, 2), new Normal(30, 15), new Normal(17, 5), new Normal(99, 14), new Normal(68, 7) };
@@ -85,7 +85,7 @@ namespace Test_FFRD
             for (int j = 0; j < D; j++)
             {
                 // Rank data in-place: lowest to highest
-                var ranks = Statistics.RanksInplace(xVals.GetColumn(j));
+                var ranks = Statistics.RanksInPlace(xVals.GetColumn(j));
                 // Weibull plotting position: rank / (N+1)
                 xPP.SetColumn(j, ranks.Divide(N + 1));
                 // Z-transform of plotting positions
@@ -247,7 +247,7 @@ namespace Test_FFRD
             for (int j = 0; j < D; j++)
             {
                 // Rank data in-place: lowest to highest
-                var ranks = Statistics.RanksInplace(xVals.GetColumn(j));
+                var ranks = Statistics.RanksInPlace(xVals.GetColumn(j));
                 // Weibull plotting position: rank / (N+1)
                 xPP.SetColumn(j, ranks.Divide(N + 1));
                 // Z-transform of plotting positions
