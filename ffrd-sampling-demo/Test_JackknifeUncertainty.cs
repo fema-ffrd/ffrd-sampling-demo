@@ -53,14 +53,14 @@ namespace Test_FFRD
 
             for (int i = 0; i < probabilities.Length; i++)
             {
-                Debug.WriteLine(bootstrapCIs[i, 1] + "," + bootstrapCIs[i, 0] + "," + Math.Exp(thetaHat[i]));
+                //Debug.WriteLine(bootstrapCIs[i, 1] + "," + bootstrapCIs[i, 0] + "," + Math.Exp(thetaHat[i]));
             }
 
             // Run jackknife analysis to get quantile standard errors
             // The jackknife only requires N replications, so it is much faster than the bootstrap. 
             // However, the jackknife will only give us the quantile standard error.
             // We have to approximate the CI using the standard Normal method.
-            var logSE = JackkifeStandardError(sample, probabilities, thetaHat, Fs);
+            var logSE = JackknifeStandardError(sample, probabilities, Fs);
             double z95 = Normal.StandardZ(0.95), z05 = Normal.StandardZ(0.05);
 
             for (int i = 0; i < probabilities.Length; i++)
@@ -73,53 +73,66 @@ namespace Test_FFRD
 
         }
 
-
         /// <summary>
         /// Estimates the log-space standard error for each probability using the jackknife method.
         /// </summary>
         /// <param name="sampleData">Sample of data.</param>
         /// <param name="probabilities">List of non-exceedance probabilities.</param>
         /// <param name="thetaHats">The list of best-estimate log-transformed quantiles.</param>
-        private double[] JackkifeStandardError(IList<double> sampleData, IList<double> probabilities, IList<double> thetaHats, UnivariateDistributionBase univariateDistribution)
+        private double[] JackknifeStandardError( IList<double> sampleData,IList<double> probabilities, UnivariateDistributionBase univariateDistribution)
         {
-            var N = sampleData.Count;
-            var I2 = new double[probabilities.Count];
-            var se = new double[probabilities.Count];
+            int N = sampleData.Count;
+            int P = probabilities.Count;
 
-            // Perform Jackknife
-            Parallel.For(0, N, idx =>
+            // collect jackknife estimates: rows = successful deletions, cols = probabilities
+            var thetaJK = new List<double[]>(capacity: N);
+
+            // 1) generate leave-one-out estimates
+            Parallel.For(0, N, i =>
             {
-                // Remove data point
-                var jackSample = new List<double>(sampleData);
-                jackSample.RemoveAt(idx);
-                // Estimate distribution
-                var newDistribution = univariateDistribution.Clone();
+                var jack = new List<double>(sampleData);
+                jack.RemoveAt(i);
 
+                var d = univariateDistribution.Clone();
                 try
                 {
-                    ((IEstimation)newDistribution).Estimate(jackSample, ParameterEstimationMethod.MaximumLikelihood);
-                    // Get quantiles from new distribution
-                    var thetaJack = new double[probabilities.Count];
-                    for (int i = 0; i < probabilities.Count; i++)
-                    {
-                        thetaJack[i] = Tools.Log(newDistribution.InverseCDF(probabilities[i]));
-                        Tools.ParallelAdd(ref I2[i], Math.Pow(thetaHats[i] - thetaJack[i], 2));
-                    }
+                    ((IEstimation)d).Estimate(jack, ParameterEstimationMethod.MaximumLikelihood);
+
+                    var row = new double[P];
+                    for (int j = 0; j < P; j++)
+                        row[j] = Math.Log(d.InverseCDF(probabilities[j]));
+
+                    lock (thetaJK) thetaJK.Add(row);
                 }
                 catch
                 {
-                    // MLE can fail to find a solution
-                    // So just skipping as a safeguard for this demo. 
-                };
-
+                    // skip this replicate; optionally log/debug
+                }
             });
-            // Get quantile standard error
-            for (int i = 0; i < probabilities.Count; i++)
-                se[i] = Math.Sqrt((N - 1) / (double)N * I2[i]);
 
+            int m = thetaJK.Count;  // successful replicates
+            if (m < 2) throw new InvalidOperationException("Insufficient jackknife replicates.");
+
+            // 2) compute jackknife means
+            var mean = new double[P];
+            foreach (var row in thetaJK)
+                for (int j = 0; j < P; j++) mean[j] += row[j];
+            for (int j = 0; j < P; j++) mean[j] /= m;
+
+            // 3) compute sum of squared deviations around jackknife mean
+            var se = new double[P];
+            for (int j = 0; j < P; j++)
+            {
+                double ssd = 0.0;
+                foreach (var row in thetaJK)
+                {
+                    double d = row[j] - mean[j];
+                    ssd += d * d;
+                }
+                se[j] = Math.Sqrt((m - 1.0) / m * ssd);
+            }
             return se;
         }
-
 
     }
 }
