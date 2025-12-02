@@ -78,8 +78,7 @@ namespace Test_FFRD
         /// </summary>
         /// <param name="sampleData">Sample of data.</param>
         /// <param name="probabilities">List of non-exceedance probabilities.</param>
-        /// <param name="thetaHats">The list of best-estimate log-transformed quantiles.</param>
-        private double[] JackknifeStandardError( IList<double> sampleData,IList<double> probabilities, UnivariateDistributionBase univariateDistribution)
+        private double[] JackknifeStandardError(IList<double> sampleData, IList<double> probabilities, UnivariateDistributionBase univariateDistribution)
         {
             int N = sampleData.Count;
             int P = probabilities.Count;
